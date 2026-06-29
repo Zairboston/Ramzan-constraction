@@ -1,0 +1,6 @@
+{
+  "name": "Ramzan Construction",
+  "description": "Modern, premium, and responsive website for Ramzan Construction, supporting English, Kyrgyz, and Russian languages with a premium black, white, and gold theme.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
