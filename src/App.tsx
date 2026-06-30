@@ -21,7 +21,10 @@ import {
   ChevronRight,
   ShieldCheck,
   Zap,
-  Hammer
+  Hammer,
+  Send,
+  Bot,
+  Sparkles
 } from 'lucide-react';
 
 import { 
@@ -94,6 +97,66 @@ export default function App() {
   const [contactStatus, setContactStatus] = useState<'idle' | 'sending' | 'success'>('idle');
 
   const t = translations[lang];
+
+  // AI Chatbot States
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'model'; text: string; id: string }[]>(() => [
+    { role: 'model', text: translations[lang].chatbotWelcomeMsg, id: 'welcome' }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+
+  // Sync welcome message on language change if it's the only message
+  useEffect(() => {
+    if (chatMessages.length === 1 && chatMessages[0].id === 'welcome') {
+      setChatMessages([{ role: 'model', text: t.chatbotWelcomeMsg, id: 'welcome' }]);
+    }
+  }, [lang, t.chatbotWelcomeMsg]);
+
+  // Handle Send Chat message
+  const handleSendChatMessage = async (msgText?: string) => {
+    const textToSend = (msgText || chatInput).trim();
+    if (!textToSend || chatLoading) return;
+
+    if (!msgText) {
+      setChatInput('');
+    }
+
+    const userMessage = { role: 'user' as const, text: textToSend, id: Math.random().toString() };
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatLoading(true);
+
+    try {
+      const history = chatMessages.map(m => ({ role: m.role, text: m.text }));
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: textToSend,
+          history
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch response');
+      }
+
+      const data = await response.json();
+      setChatMessages(prev => [...prev, { role: 'model', text: data.text, id: Math.random().toString() }]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      const errMsg = lang === 'en' 
+        ? "Sorry, I am having trouble connecting to my brain right now. Please try again or call us!" 
+        : lang === 'ky' 
+          ? "Кечириңиз, байланыш үзүлдү. Сураныч, кайра аракет кылыңыз же бизге чалыңыз!" 
+          : "Извините, произошла ошибка подключения. Пожалуйста, попробуйте еще раз или позвоните нам!";
+      setChatMessages(prev => [...prev, { role: 'model', text: errMsg, id: Math.random().toString() }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   // Sync Language change to LocalStorage
   const handleLangChange = (newLang: Language) => {
@@ -402,11 +465,31 @@ export default function App() {
 
             {/* Slogan */}
             <h1 className="font-display font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white tracking-tight leading-none">
-              Building <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-400 to-gold-600">Trust</span>.<br />
-              Creating <span className="relative inline-block">
-                Quality
-                <span className="absolute left-0 bottom-1.5 w-full h-1 bg-gold-500/40 rounded-full" />
-              </span>.
+              {lang === 'en' ? (
+                <>
+                  Building <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-400 to-gold-600">Trust</span>.<br />
+                  Creating <span className="relative inline-block">
+                    Quality
+                    <span className="absolute left-0 bottom-1.5 w-full h-1 bg-gold-500/40 rounded-full" />
+                  </span>.
+                </>
+              ) : lang === 'ky' ? (
+                <>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-400 to-gold-600">Ишенимди</span> курабыз.<br />
+                  <span className="relative inline-block">
+                    Сапатты
+                    <span className="absolute left-0 bottom-1.5 w-full h-1 bg-gold-500/40 rounded-full" />
+                  </span> түзөбүз.
+                </>
+              ) : (
+                <>
+                  Строим <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 via-gold-400 to-gold-600">доверие</span>.<br />
+                  Создаем <span className="relative inline-block">
+                    качество
+                    <span className="absolute left-0 bottom-1.5 w-full h-1 bg-gold-500/40 rounded-full" />
+                  </span>.
+                </>
+              )}
             </h1>
 
             {/* Sub-slogan */}
@@ -534,7 +617,7 @@ export default function App() {
                   onClick={() => scrollToSection('contact')}
                   className="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-gold-500 dark:hover:bg-gold-600 text-white dark:text-zinc-950 font-bold text-xs uppercase tracking-wider py-3.5 px-6 rounded-xl transition-all shadow-md cursor-pointer"
                 >
-                  <span>Connect With Us</span>
+                  <span>{lang === 'en' ? "Connect With Us" : lang === 'ky' ? "Байланышуу" : "Связаться с нами"}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
@@ -555,7 +638,7 @@ export default function App() {
                     className={`p-6 rounded-2xl border ${colors[idx]} hover:border-gold-500/50 transition-all duration-300 shadow-md group`}
                   >
                     <span className="font-mono text-xs font-bold text-gold-500 tracking-widest block mb-3 uppercase">
-                      CRITERIA 0{idx + 1}
+                      {t.criteriaLabel} 0{idx + 1}
                     </span>
                     <h3 className="font-display font-bold text-base text-zinc-900 dark:text-zinc-100 group-hover:text-gold-500 transition-colors mb-2">
                       {card.title}
@@ -583,7 +666,7 @@ export default function App() {
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className="font-mono text-xs font-bold text-gold-500 tracking-widest uppercase">
-              EXPERTISE & SOLUTIONS
+              {t.taglineExpertise}
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-4xl text-zinc-900 dark:text-white leading-tight mt-1 mb-3">
               {t.servicesTitle}
@@ -602,11 +685,11 @@ export default function App() {
                 type="text" 
                 value={serviceSearch}
                 onChange={(e) => setServiceSearch(e.target.value)}
-                placeholder="Search services..."
+                placeholder={t.searchPlaceholder}
                 className="w-full bg-white dark:bg-dark-card border border-zinc-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-gold-500/40"
               />
               {serviceSearch && (
-                <button onClick={() => setServiceSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs">Clear</button>
+                <button onClick={() => setServiceSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 text-xs">{t.clearButton}</button>
               )}
             </div>
 
@@ -684,16 +767,16 @@ export default function App() {
           {/* Empty Results State */}
           {filteredServices.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-zinc-400 text-sm">No services matches your search.</p>
-              <button onClick={() => { setServiceSearch(''); setServiceFilter('all'); }} className="mt-2 text-xs font-bold text-gold-500 underline uppercase cursor-pointer">Reset Filters</button>
+              <p className="text-zinc-400 text-sm">{t.noServicesFound}</p>
+              <button onClick={() => { setServiceSearch(''); setServiceFilter('all'); }} className="mt-2 text-xs font-bold text-gold-500 underline uppercase cursor-pointer">{t.resetFiltersButton}</button>
             </div>
           )}
 
           {/* Quick Consultation Ribbon */}
           <div className="mt-12 sm:mt-16 bg-gradient-to-tr from-dark-card to-dark-main text-white rounded-2xl p-6 sm:p-8 border border-zinc-200/10 dark:border-white/10 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-xl">
             <div className="space-y-1 text-center sm:text-left">
-              <h4 className="font-display font-bold text-lg text-white">Need a custom specialty project?</h4>
-              <p className="text-zinc-400 text-xs sm:text-sm max-w-xl">Our civil engineering estimators operate across Kyrgyzstan. Connect directly to schedule physical concrete core tests.</p>
+              <h4 className="font-display font-bold text-lg text-white">{t.customProjectTitle}</h4>
+              <p className="text-zinc-400 text-xs sm:text-sm max-w-xl">{t.customProjectDesc}</p>
             </div>
             <button 
               onClick={() => setQuoteModalOpen(true)}
@@ -717,7 +800,7 @@ export default function App() {
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
             <span className="font-mono text-xs font-bold text-gold-500 tracking-widest uppercase">
-              STRUCTURAL PORTFOLIO
+              {t.taglinePortfolio}
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-4xl text-zinc-900 dark:text-zinc-50 leading-tight mt-1 mb-3">
               {t.projectsTitle}
@@ -832,7 +915,7 @@ export default function App() {
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className="font-mono text-xs font-bold text-gold-500 tracking-widest uppercase">
-              VISUAL CAPABILITIES
+              {t.taglineVisual}
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-4xl text-zinc-900 dark:text-white leading-tight mt-1 mb-3">
               {t.galleryTitle}
@@ -899,7 +982,7 @@ export default function App() {
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className="font-mono text-xs font-bold text-gold-500 tracking-widest uppercase">
-              CLIENT RELATIONSHIPS
+              {t.taglineClients}
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-4xl text-zinc-900 dark:text-white leading-tight mt-1 mb-3">
               {t.testimonialsTitle}
@@ -965,7 +1048,7 @@ export default function App() {
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
             <span className="font-mono text-xs font-bold text-gold-500 tracking-widest uppercase">
-              SUPPORT INDEX
+              {t.taglineFaq}
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-4xl text-zinc-900 dark:text-zinc-50 leading-tight mt-1 mb-3">
               {t.faqTitle}
@@ -1027,7 +1110,7 @@ export default function App() {
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className="font-mono text-xs font-bold text-gold-500 tracking-widest uppercase">
-              SEO INSIGHTS
+              {t.taglineInsights}
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-4xl text-zinc-900 dark:text-white leading-tight mt-1 mb-3">
               {t.blogTitle}
@@ -1096,7 +1179,7 @@ export default function App() {
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <span className="font-mono text-xs font-bold text-gold-500 tracking-widest uppercase">
-              GET COMMITTED
+              {t.taglineContact}
             </span>
             <h2 className="font-display font-bold text-3xl sm:text-4xl text-zinc-900 dark:text-white leading-tight mt-1 mb-3">
               {t.contactTitle}
@@ -1119,7 +1202,7 @@ export default function App() {
                     <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center justify-center mb-4">
                       <Check className="w-6 h-6 animate-pulse" />
                     </div>
-                    <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-white mb-2">Message Sent</h3>
+                    <h3 className="font-display font-bold text-lg text-zinc-900 dark:text-white mb-2">{t.messageSentTitle}</h3>
                     <p className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed max-w-xs mb-5">
                       {t.contactFormSuccess}
                     </p>
@@ -1127,7 +1210,7 @@ export default function App() {
                       onClick={() => setContactStatus('idle')}
                       className="bg-gold-500 hover:bg-gold-600 text-zinc-950 text-xs font-bold py-2 px-6 rounded-lg tracking-wider uppercase transition-all"
                     >
-                      New Inquiry
+                      {t.newInquiryButton}
                     </button>
                   </div>
                 ) : (
@@ -1332,19 +1415,132 @@ export default function App() {
 
       {/* 13. FLOATING COMPLIANCES AND UTILITY FLUIDS */}
       
-      {/* Floating WhatsApp Quick link button */}
-      <a 
-        href={`https://wa.me/996555777888?text=${encodeURIComponent(lang === 'en' ? "Hello! I am reviewing the Ramzan Construction website and would like a quote." : lang === 'ky' ? "Саламатсызбы! Рамзан Констракшн боюнча маалымат алгым келет." : "Здравствуйте! Я бы хотел получить оценку стоимости проекта от Ramzan Construction.")}`}
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-30 p-4 rounded-full bg-emerald-500 text-white shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center hover:bg-emerald-600 group"
-        title="Chat on WhatsApp"
-      >
-        <MessageCircle className="w-6 h-6 shrink-0" />
-        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-out font-sans text-xs font-bold uppercase tracking-wider group-hover:ml-2 whitespace-nowrap">
-          WHATSAPP CHAT
-        </span>
-      </a>
+      {/* Floating AI Chatbot Widget */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end">
+        {/* Chat window */}
+        <AnimatePresence>
+          {chatOpen && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              className="w-[320px] sm:w-[375px] h-[450px] bg-white dark:bg-dark-card border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden mb-4"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-zinc-900 to-zinc-800 dark:from-zinc-950 dark:to-zinc-900 px-4 py-3 flex items-center justify-between border-b border-zinc-200/10 dark:border-white/5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-gold-500/15 border border-gold-500/30 flex items-center justify-center text-gold-400">
+                    <Bot className="w-4.5 h-4.5" />
+                  </div>
+                  <div className="text-left">
+                    <h4 className="font-display font-bold text-xs text-white leading-none flex items-center gap-1">
+                      {t.chatbotHeaderTitle}
+                      <Sparkles className="w-3 h-3 text-gold-400 animate-pulse" />
+                    </h4>
+                    <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono mt-1 uppercase font-semibold">
+                      <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+                      Online
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setChatOpen(false)}
+                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-zinc-50 dark:bg-dark-main/20 scrollbar-none flex flex-col">
+                {chatMessages.map((msg) => (
+                  <div 
+                    key={msg.id}
+                    className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'self-end items-end' : 'self-start items-start'}`}
+                  >
+                    <div 
+                      className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                        msg.role === 'user' 
+                          ? 'bg-zinc-900 dark:bg-gold-500 text-white dark:text-zinc-950 rounded-br-none' 
+                          : 'bg-white dark:bg-dark-card border border-zinc-150 dark:border-white/10 text-zinc-800 dark:text-zinc-200 rounded-bl-none shadow-sm'
+                      }`}
+                    >
+                      {msg.text.split('\n').map((line, idx) => (
+                        <p key={idx} className={idx > 0 ? "mt-1" : ""}>{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Loading indicator */}
+                {chatLoading && (
+                  <div className="self-start flex items-center gap-1.5 bg-white dark:bg-dark-card border border-zinc-150 dark:border-white/10 p-3 rounded-2xl rounded-bl-none shadow-sm">
+                    <span className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-bounce animate-duration-500" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-bounce animate-duration-500" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-bounce animate-duration-500" style={{ animationDelay: '300ms' }} />
+                  </div>
+                )}
+              </div>
+
+              {/* Starter Prompts */}
+              {chatMessages.length === 1 && (
+                <div className="px-3 py-2 border-t border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-dark-main/40 flex flex-wrap gap-1.5 justify-start">
+                  {[
+                    lang === 'en' ? "What services do you offer?" : lang === 'ky' ? "Кандай кызматтарды сунуштайсыз?" : "Какие услуги вы предлагаете?",
+                    lang === 'en' ? "Tell me about your projects." : lang === 'ky' ? "Долбоорлоруңуз тууралуу айтып бериңиз." : "Расскажите о ваших проектах.",
+                    lang === 'en' ? "How do I request a quote?" : lang === 'ky' ? "Кантип баа алсам болот?" : "Как заказать оценку?"
+                  ].map((starter, sIdx) => (
+                    <button 
+                      key={sIdx}
+                      onClick={() => handleSendChatMessage(starter)}
+                      className="text-[10px] font-medium bg-white dark:bg-dark-card hover:bg-gold-500 hover:text-zinc-950 dark:hover:bg-gold-500 dark:hover:text-zinc-950 border border-zinc-200/60 dark:border-white/10 text-zinc-600 dark:text-zinc-300 px-2.5 py-1 rounded-full transition-all text-left cursor-pointer"
+                    >
+                      {starter}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Input Form */}
+              <form 
+                onSubmit={(e) => { e.preventDefault(); handleSendChatMessage(); }}
+                className="p-2.5 border-t border-zinc-200/60 dark:border-white/10 bg-white dark:bg-dark-card flex items-center gap-2"
+              >
+                <input 
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder={t.chatbotInputPlaceholder}
+                  className="flex-1 bg-zinc-50 dark:bg-dark-main border border-zinc-200 dark:border-white/10 rounded-xl px-3.5 py-2 text-xs text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1.5 focus:ring-gold-500/40"
+                />
+                <button 
+                  type="submit"
+                  disabled={!chatInput.trim() || chatLoading}
+                  className="p-2 bg-gold-500 hover:bg-gold-600 disabled:opacity-55 disabled:hover:bg-gold-500 text-zinc-950 rounded-xl transition-all cursor-pointer flex items-center justify-center"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Launcher Button */}
+        <button 
+          onClick={() => setChatOpen(!chatOpen)}
+          className="p-4 rounded-full bg-gold-500 hover:bg-gold-600 text-zinc-950 shadow-2xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center group cursor-pointer z-40"
+          title={t.chatbotHeaderTitle}
+        >
+          {chatOpen ? (
+            <X className="w-6 h-6 shrink-0" />
+          ) : (
+            <MessageCircle className="w-6 h-6 shrink-0" />
+          )}
+          <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-out font-sans text-xs font-bold uppercase tracking-wider group-hover:ml-2 whitespace-nowrap">
+            {chatOpen ? (lang === 'en' ? "Close" : lang === 'ky' ? "Жабуу" : "Закрыть") : (lang === 'en' ? "Ask AI Assistant" : lang === 'ky' ? "Адистен суроо" : "Спросить ИИ")}
+          </span>
+        </button>
+      </div>
 
       {/* Back To Top Button */}
       <AnimatePresence>

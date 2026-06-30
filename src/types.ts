@@ -106,6 +106,28 @@ export interface Translation {
   // Quote dialog
   quoteTitle: string;
   quoteSub: string;
+
+  // Extended UI translations
+  taglineExpertise: string;
+  taglinePortfolio: string;
+  taglineVisual: string;
+  taglineClients: string;
+  taglineFaq: string;
+  taglineInsights: string;
+  taglineContact: string;
+  searchPlaceholder: string;
+  clearButton: string;
+  noServicesFound: string;
+  resetFiltersButton: string;
+  customProjectTitle: string;
+  customProjectDesc: string;
+  messageSentTitle: string;
+  newInquiryButton: string;
+  criteriaLabel: string;
+  chatbotHeaderTitle: string;
+  chatbotWelcomeMsg: string;
+  chatbotInputPlaceholder: string;
+  chatbotButton: string;
 }
 
 export const translations: Record<Language, Translation> = {
@@ -205,7 +227,28 @@ export const translations: Record<Language, Translation> = {
     allRightsReserved: "All rights reserved.",
     
     quoteTitle: "Request a Premium Quote",
-    quoteSub: "Provide your project details below. Our senior estimator will analyze your request and provide a detailed structural projection."
+    quoteSub: "Provide your project details below. Our senior estimator will analyze your request and provide a detailed structural projection.",
+    
+    taglineExpertise: "EXPERTISE & SOLUTIONS",
+    taglinePortfolio: "STRUCTURAL PORTFOLIO",
+    taglineVisual: "VISUAL CAPABILITIES",
+    taglineClients: "CLIENT RELATIONSHIPS",
+    taglineFaq: "SUPPORT INDEX",
+    taglineInsights: "SEO INSIGHTS",
+    taglineContact: "GET COMMITTED",
+    searchPlaceholder: "Search services...",
+    clearButton: "Clear",
+    noServicesFound: "No services matches your search.",
+    resetFiltersButton: "Reset Filters",
+    customProjectTitle: "Need a custom specialty project?",
+    customProjectDesc: "Our civil engineering estimators operate across Kyrgyzstan. Connect directly to schedule physical concrete core tests.",
+    messageSentTitle: "Message Sent",
+    newInquiryButton: "New Inquiry",
+    criteriaLabel: "CRITERIA",
+    chatbotHeaderTitle: "Ramzan Assistant",
+    chatbotWelcomeMsg: "Hello! I am the Ramzan Construction AI Assistant. How can I help you build your dream property today?",
+    chatbotInputPlaceholder: "Ask about our services, projects...",
+    chatbotButton: "Ask AI"
   },
   ky: {
     navHome: "Башкы бет",
@@ -303,7 +346,28 @@ export const translations: Record<Language, Translation> = {
     allRightsReserved: "Бардык укуктар корголгон.",
     
     quoteTitle: "Премиум баалоону суроо",
-    quoteSub: "Төмөндө долбоордун чоо-жайын калтырыңыз. Биздин улук адис маалыматты талдап, сизге толук инженердик эсептеп берүүнү сунуштайт."
+    quoteSub: "Төмөндө долбоордун чоо-жайын калтырыңыз. Биздин улук адис маалыматты талдап, сизге толук инженердик эсептеп берүүнү сунуштайт.",
+    
+    taglineExpertise: "ТАЖРЫЙБА ЖАНА ЧЕЧИМДЕР",
+    taglinePortfolio: "КУРУЛУШ ПОРТФОЛИОСУ",
+    taglineVisual: "ВИЗУАЛДЫК МҮМКҮНЧҮЛҮКТӨР",
+    taglineClients: "КАРДАРЛАР МЕНЕН МАМИЛЕЛЕР",
+    taglineFaq: "КОЛДОО ИНДЕКСИ",
+    taglineInsights: "КУРУЛУШ СЫРЛАРЫ",
+    taglineContact: "БАЙЛАНЫШТЫ КУРУУ",
+    searchPlaceholder: "Кызматтарды издөө...",
+    clearButton: "Тазалоо",
+    noServicesFound: "Издөөгө туура келген кызматтар табылган жок.",
+    resetFiltersButton: "Чыпкаларды баштапкы абалга келтирүү",
+    customProjectTitle: "Жеке өзгөчө долбоор керекпи?",
+    customProjectDesc: "Биздин инженердик-курулуш баалоочу адистерибиз Кыргызстан боюнча иштешет. Түздөн-түз байланышып, бетонду текшерүүнү пландаштырыңыз.",
+    messageSentTitle: "Билдирүү жөнөтүлдү",
+    newInquiryButton: "Жаңы суроо-талап",
+    criteriaLabel: "КРИТЕРИЙ",
+    chatbotHeaderTitle: "Рамзан Жардамчысы",
+    chatbotWelcomeMsg: "Саламатсызбы! Мен «Рамзан Констракшн» компаниясынын жасалма интеллект жардамчысымын. Бүгүн сизге кыялыңыздагы мүлктү курууга кантип жардам бере алам?",
+    chatbotInputPlaceholder: "Кызматтарыбыз же долбоорлор тууралуу сураңыз...",
+    chatbotButton: "Суроо"
   },
   ru: {
     navHome: "Главная",
@@ -401,7 +465,28 @@ export const translations: Record<Language, Translation> = {
     allRightsReserved: "Все права защищены.",
     
     quoteTitle: "Заказать премиум расчет",
-    quoteSub: "Предоставьте детали вашего проекта ниже. Наш ведущий сметчик проанализирует информацию и предоставит детальный структурный расчет."
+    quoteSub: "Предоставьте детали вашего проекта ниже. Наш ведущий сметчик проанализирует информацию и предоставит детальный структурный расчет.",
+    
+    taglineExpertise: "ОПЫТ И РЕШЕНИЯ",
+    taglinePortfolio: "СТРОИТЕЛЬНОЕ ПОРТФОЛИО",
+    taglineVisual: "ВИЗУАЛЬНЫЕ ВОЗМОЖНОСТИ",
+    taglineClients: "ОТНОШЕНИЯ С КЛИЕНТАМИ",
+    taglineFaq: "ИНДЕКС ПОДДЕРЖКИ",
+    taglineInsights: "СТРОИТЕЛЬНЫЕ ИНСАЙТЫ",
+    taglineContact: "НАЧАТЬ СОТРУДНИЧЕСТВО",
+    searchPlaceholder: "Поиск услуг...",
+    clearButton: "Очистить",
+    noServicesFound: "Услуги по вашему запросу не найдены.",
+    resetFiltersButton: "Сбросить фильтры",
+    customProjectTitle: "Нужен индивидуальный спецпроект?",
+    customProjectDesc: "Наши инженеры-сметчики работают по всему Кыргызстану. Свяжитесь напрямую для планирования экспертизы прочности бетона.",
+    messageSentTitle: "Сообщение отправлено",
+    newInquiryButton: "Новый запрос",
+    criteriaLabel: "КРИТЕРИЙ",
+    chatbotHeaderTitle: "Рамзан Помощник",
+    chatbotWelcomeMsg: "Здравствуйте! Я ИИ-помощник строительной компании Ramzan Construction. Как я могу помочь вам построить дом вашей мечты сегодня?",
+    chatbotInputPlaceholder: "Спросите о наших услугах или проектах...",
+    chatbotButton: "Спросить"
   }
 };
 
